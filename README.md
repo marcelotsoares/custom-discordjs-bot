@@ -33,9 +33,9 @@ npm run start:dev
 ```
 
 ## Comandos 🤖
-Nome | Descrição 
-| - | - | 
-[/marketplace](src/commands/User/marketplace.command.ts) | Cria um Menu Marketplace
+Nome | Descrição | Comando Example
+| - | - | - | 
+[/marketplace](src/commands/User/marketplace.command.ts) | Cria um Menu Marketplace | [image](examples/marketplace_command.jpg)
 
 > Note: Você pode adicionar mais comandos criando em [src/commands](src/commands). 
 
