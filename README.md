@@ -18,12 +18,16 @@ GUILD_ID= # guildId (id do Servidor do Discord)
 
 CLIENT_ID= # Id do Bot
 ```
-3. Renomeie o [.env.example](.env.example) para `.env`
-4. Instalando dependências
+3. Configure a Database [database.config](src/config/database.config.ts).
+```
+uri = # Ex: mongodb://localhost:27017"
+```
+4. Renomeie o [.env.example](.env.example) para `.env`
+5. Instalando dependências
 ```sh-session
 npm install
 ```
-5. Iniciando o Bot
+6. Iniciando o Bot
 ```sh-session
 npm run start:dev
 ```
@@ -31,7 +35,7 @@ npm run start:dev
 ## Comandos 🤖
 Nome | Descrição 
 | - | - | 
-[/marketplace](src/commands/User/marketplace.command.ts) | Cria um Menu de Marketplace"
+[/marketplace](src/commands/User/marketplace.command.ts) | Cria um Menu Marketplace
 
 > Note: Você pode adicionar mais comandos criando em [src/commands](src/commands). 
 
