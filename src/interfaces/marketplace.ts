@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { IUser } from './user';
 
 export interface IMarketplace {
@@ -14,9 +14,9 @@ export interface IMarketplaceConfig {
 
 export interface ICreateMenuMarketplace {
     embed: MessageEmbed;
-    rowSelectMenu: MessageActionRow;
+    rowSelectMenu: any;
 }
 
-export type MarketplaceBuyItem = Pick<IMarketplace, 'price'>;
+export type MarketplaceBuyItem = Pick<IMarketplace, 'price' | 'itemId'>;
 
 export interface IMarketplaceBuyItem extends MarketplaceBuyItem, IUser {}

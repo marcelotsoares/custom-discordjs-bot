@@ -20,16 +20,23 @@ export class MarketplaceController {
         return item;
     }
 
-    async tryToBuyItemOnMarketplace({ user, price }: IMarketplaceBuyItem) {
+    async tryToBuyItemOnMarketplace({ user, price, itemId }: IMarketplaceBuyItem) {
         try {
             const userController = this.customBotClient.userController;
 
-            userController.tryUserPayment({
+            await userController.tryUserPayment({
                 user: user,
                 coins: price,
             });
+
+            await userController.giveInventoryItem({
+                user: user,
+                itemId: itemId,
+            });
         } catch (error) {
-            console.log(`[tryToBuyItemOnMarketplace:error]`, error);
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
         }
     }
 }

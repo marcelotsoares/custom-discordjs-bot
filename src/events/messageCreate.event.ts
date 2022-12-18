@@ -3,7 +3,7 @@
  * Podemos usar este evento como uma espécie de middleware para impedir vulnarabilidades ou outras coisas.
  */
 
-import {EventDef} from "../interfaces/events";
+import { EventDef } from '../interfaces/events';
 
 export const event: EventDef = {
     name: 'messageCreate',
@@ -13,58 +13,65 @@ export const event: EventDef = {
         const userController = client.userController;
         const lvlController = client.levelController;
         const intervalTimeEarnExpInMilliseconds = 60000; // 1 Minute
-        
+
         if (message.author.bot) return;
 
-        const {id: discordId, username: discordName} = message.author;
-        
-        const executeControllerFunc = async () => {
-            const user = await userController.getUserByDiscordId(discordId)
-            if(!user) {
-                await userController.createUser({discordId, discordName});
-            }
+        const { id: discordId, username: discordName } = message.author;
 
-            await lvlController.giveExpToUserByMessage({
-                user: user,
-                messageLength: message.content.length
-            });
-        }
-        
+        const executeControllerFunc = async () => {
+            try {
+                const user = await userController.getUserByDiscordId(discordId);
+
+                await lvlController.giveExpToUserByMessage({
+                    user: user,
+                    messageLength: message.content.length,
+                });
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.log(error.message);
+
+                    if (error.message == 'User with this discordId not found') {
+                        await userController.createUser({ discordId, discordName });
+                    }
+                }
+            }
+        };
+
         const executeCommands = async (commandName: string, timeToUseCommand: number) => {
             const user = users.get(discordId);
 
-            if(!user) {
+            if (!user) {
                 users.set(discordId, {
-                    commands: [{
-                        commandName: commandName,
-                        lastTimeCommandWasExec: new Date().getTime() + timeToUseCommand
-                    }]
+                    commands: [
+                        {
+                            commandName: commandName,
+                            lastTimeCommandWasExec: new Date().getTime() + timeToUseCommand,
+                        },
+                    ],
                 });
-                return true
-            };
-
-            const commandExist = user.commands.find(props => props.commandName === commandName);
-            if(!commandExist) {
-                user.commands.push({
-                    commandName: commandName,
-                    lastTimeCommandWasExec: new Date().getTime() + timeToUseCommand
-                })
-                return true
-            } else if(new Date().getTime() >= commandExist.lastTimeCommandWasExec) {
-                commandExist.lastTimeCommandWasExec = new Date().getTime() + timeToUseCommand
-                return true
+                return true;
             }
 
-            return false
-        }
+            const commandExist = user.commands.find((props) => props.commandName === commandName);
+            if (!commandExist) {
+                user.commands.push({
+                    commandName: commandName,
+                    lastTimeCommandWasExec: new Date().getTime() + timeToUseCommand,
+                });
+                return true;
+            } else if (new Date().getTime() >= commandExist.lastTimeCommandWasExec) {
+                commandExist.lastTimeCommandWasExec = new Date().getTime() + timeToUseCommand;
+                return true;
+            }
+
+            return false;
+        };
 
         if (message.content) {
             const execCommand = await executeCommands('messageCreate', intervalTimeEarnExpInMilliseconds);
-            if(execCommand) {
+            if (execCommand) {
                 await executeControllerFunc();
-            };
-        };
-
-        await userController.createUser({discordId, discordName});
-    }
+            }
+        }
+    },
 };

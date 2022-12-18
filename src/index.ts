@@ -14,7 +14,7 @@ import { connect } from 'mongoose';
 import { MongoDbConfig, DualEnv } from './interfaces/configs.js';
 import { MarketplaceController } from './controllers/marketplace.controller.js';
 import { BotUserModel } from './models/bot-user';
-import { NotFoundException } from 'classes/errors.js';
+import { NotFoundException } from './classes/errors.js';
 
 const discordClientOptions = {
     intents: [
@@ -152,6 +152,7 @@ const main = async () => {
 
                     await marketplaceController.tryToBuyItemOnMarketplace({
                         user: user,
+                        itemId: itemId,
                         price: itemConfig.price,
                     });
 
@@ -160,13 +161,12 @@ const main = async () => {
                     await customBotClient.delay(5000);
 
                     await interaction.deleteReply();
-
-                    await customBotClient.userController.giveInventoryItem({
-                        user: user,
-                        itemId: itemId,
-                    });
                 } catch (error) {
-                    console.log(error);
+                    if (error instanceof Error) {
+                        await interaction.reply(error.message);
+                        await customBotClient.delay(5000);
+                        await interaction.deleteReply();
+                    }
                 }
             }
         }

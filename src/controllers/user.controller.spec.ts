@@ -1,18 +1,14 @@
 import { UserController } from './user.controller';
 import { CustomBotClient } from '../classes/custom-bot-client.class';
 import { BotUserModel } from '../models/bot-user';
-import {
-    mockBotUser,
-    mockBotUserModel,
-} from '../models/__mocks__/bot-user.mock';
+import { mockBotUser, mockBotUserModel } from '../models/__mocks__/bot-user.mock';
 import { NotFoundException } from '../classes/errors';
 
 jest.mock('../classes/custom-bot-client.class');
 
 const buildUserController = () => {
     const CustomBotClientMock = CustomBotClient as jest.Mock<CustomBotClient>;
-    const customBotClientMocked =
-        new CustomBotClientMock() as jest.Mocked<CustomBotClient>;
+    const customBotClientMocked = new CustomBotClientMock() as jest.Mocked<CustomBotClient>;
 
     const userController = new UserController({
         customBotClient: customBotClientMocked,
@@ -62,11 +58,10 @@ describe('userController', () => {
 
             const user = await userController.getUserByDiscordId('');
 
-            const getItemByUserInventory =
-                await userController.tryGetInventoryItem({
-                    user: user,
-                    itemId: 'ticket_2',
-                });
+            const getItemByUserInventory = await userController.tryGetInventoryItem({
+                user: user,
+                itemId: 'ticket_2',
+            });
 
             expect(getItemByUserInventory).toMatchObject(user.inventory[0]);
             mockBotUserModel.findOne.mockReset();
@@ -84,12 +79,8 @@ describe('userController', () => {
                 itemId: '',
             });
 
-            await expect(getItemByUserInventory).rejects.toThrow(
-                "Item with that Id in user's inventory not found"
-            );
-            await expect(getItemByUserInventory).rejects.toBeInstanceOf(
-                NotFoundException
-            );
+            await expect(getItemByUserInventory).rejects.toThrow("Item with that Id in user's inventory not found");
+            await expect(getItemByUserInventory).rejects.toBeInstanceOf(NotFoundException);
             mockBotUserModel.findOne.mockReset();
         });
     });
@@ -121,6 +112,7 @@ describe('userController', () => {
             mockBotUserModel.findOne.mockReturnValue(mockBotUser);
 
             const user = await userController.getUserByDiscordId('');
+            user.coins = 2;
 
             const userPayment = await userController.tryUserPayment({
                 user: user,
@@ -139,15 +131,14 @@ describe('userController', () => {
             mockBotUserModel.findOne.mockReturnValue(mockBotUser);
 
             const user = await userController.getUserByDiscordId('');
+            user.coins = 1;
 
             const userPayment = userController.tryUserPayment({
                 user: user,
                 coins: 2,
             });
 
-            expect(userPayment).rejects.toThrow(
-                'Coins needed for payment not found'
-            );
+            expect(userPayment).rejects.toThrow('Coins needed for payment not found');
 
             mockBotUserModel.findOne.mockReset();
         });

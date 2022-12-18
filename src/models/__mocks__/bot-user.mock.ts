@@ -9,7 +9,7 @@ const mockBotUser: IBotUserMock = {
     discordName: 'Marcelo',
     xp: 0,
     level: 1,
-    coins: 1,
+    coins: 0,
     inventory: [
         {
             itemId: 'ticket_2',

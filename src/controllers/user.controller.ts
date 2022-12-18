@@ -2,12 +2,7 @@ import { CustomBotClient } from '../classes/custom-bot-client.class';
 import { NotFoundException } from '../classes/errors';
 import { BotUserModel, InventoryItem } from '../models/bot-user';
 import { ICustomBotClient } from '../interfaces/custom-bot';
-import {
-    ICreateUser,
-    IUserIventory,
-    IUserPayment,
-    UserModel,
-} from '../interfaces/user';
+import { ICreateUser, IUserIventory, IUserPayment, UserModel } from '../interfaces/user';
 
 export interface IUserConstructor extends ICustomBotClient {
     botUserModel: typeof BotUserModel;
@@ -33,10 +28,7 @@ export class UserController {
         return user;
     }
 
-    async createUser({
-        discordId,
-        discordName,
-    }: ICreateUser): Promise<never | void> {
+    async createUser({ discordId, discordName }: ICreateUser): Promise<never | void> {
         await this.#botUserModel.create({
             discordId: discordId,
             discordName: discordName,
@@ -54,18 +46,11 @@ export class UserController {
         });
     }
 
-    async tryGetInventoryItem({
-        user,
-        itemId,
-    }: IUserIventory): Promise<InventoryItem> {
-        const itemInventory = user.inventory.find(
-            (item) => item.itemId === itemId
-        );
+    async tryGetInventoryItem({ user, itemId }: IUserIventory): Promise<InventoryItem> {
+        const itemInventory = user.inventory.find((item) => item.itemId === itemId);
 
         if (!itemInventory) {
-            throw new NotFoundException(
-                "Item with that Id in user's inventory"
-            );
+            throw new NotFoundException("Item with that Id in user's inventory");
         }
 
         return itemInventory;
@@ -85,6 +70,7 @@ export class UserController {
 
     async giveInventoryItem({ user, itemId }: IUserIventory): Promise<void> {
         const foundItem = user.inventory.find((item) => item.itemId === itemId);
+        console.log('giveInventoryItem', foundItem);
         if (!foundItem) {
             user.inventory.push({
                 itemId: itemId,

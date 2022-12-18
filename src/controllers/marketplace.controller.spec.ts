@@ -10,6 +10,7 @@ const buildMarketplaceController = async () => {
     const mockCustomBotClient = {
         userController: {
             tryUserPayment: jest.fn(),
+            giveInventoryItem: jest.fn(),
         },
     };
 
@@ -56,6 +57,7 @@ describe('marketplaceController', () => {
             const user = mockBotUser as unknown as UserModel;
             const buyItem = await marketplaceController.tryToBuyItemOnMarketplace({
                 user: user,
+                itemId: maketplaceItemConfig.itemId,
                 price: maketplaceItemConfig.price,
             });
 
@@ -76,14 +78,15 @@ describe('marketplaceController', () => {
             const user = mockBotUser as unknown as UserModel;
             const buyItem = marketplaceController.tryToBuyItemOnMarketplace({
                 user: user,
+                itemId: maketplaceItemConfig.itemId,
                 price: maketplaceItemConfig.price,
             });
 
-            await expect(buyItem).rejects.toThrow('Coins needed for payment');
+            expect(buyItem).rejects.toThrow('Coins needed for payment');
+            expect(buyItem).rejects.toBeInstanceOf(Error);
+            expect(userPayment).rejects.toBeInstanceOf(NotFoundException);
+            expect(userPayment).toBeCalledTimes(2);
 
-            await expect(buyItem).rejects.toBeInstanceOf(NotFoundException);
-
-            expect(userPayment).toBeCalledTimes(1);
             userPayment.mockReset();
         });
     });

@@ -72,11 +72,11 @@ describe('levelController', () => {
 
         it('should be able to throw an error if it has', async () => {
             const { levelController } = buildLevelController();
-            const message = '';
 
             const user = mockBotUser as unknown as UserModel;
             user.xp = 5000;
 
+            const message = '';
             const giveExpToUser = levelController.giveExpToUserByMessage({
                 user: user,
                 messageLength: message.length,
