@@ -1,5 +1,6 @@
+import {IMarketplaceConfig} from "../interfaces/marketplace";
 
-export const MarketplaceConfig: Readonly<IMarketplaceMenuItems> = {
+export const MarketplaceConfig: IMarketplaceConfig = {
 	items: [
 		{
 			itemId: 'ticket',

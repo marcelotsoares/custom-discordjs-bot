@@ -3,7 +3,7 @@
  * Podemos usar este evento como uma espécie de middleware para impedir vulnarabilidades ou outras coisas.
  */
 
-import {EventDef} from "../interfaces/events.js";
+import {EventDef} from "../interfaces/events";
 
 export const event: EventDef = {
     name: 'messageCreate',
@@ -16,11 +16,18 @@ export const event: EventDef = {
         
         if (message.author.bot) return;
 
-        const discordId = message.author.id;
+        const {id: discordId, username: discordName} = message.author;
         
         const executeControllerFunc = async () => {
-            await userController.createUsers(discordId, message.author.username);
-            await lvlController.giveExpToUserByMessage(message);
+            const user = await userController.getUserByDiscordId(discordId)
+            if(!user) {
+                await userController.createUser({discordId, discordName});
+            }
+
+            await lvlController.giveExpToUserByMessage({
+                user: user,
+                messageLength: message.content.length
+            });
         }
         
         const executeCommands = async (commandName: string, timeToUseCommand: number) => {
@@ -58,6 +65,6 @@ export const event: EventDef = {
             };
         };
 
-        await userController.createUsers(discordId, message.author.username);
+        await userController.createUser({discordId, discordName});
     }
 };

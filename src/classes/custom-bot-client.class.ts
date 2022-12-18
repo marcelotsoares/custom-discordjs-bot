@@ -1,5 +1,5 @@
-import {Client, MessageEmbed, Message} from 'discord.js'
-import { CustomBot, ICustomBotOpts } from './custom-bot.js'
+import {Client, MessageEmbed, Message} from "discord.js"
+import {CustomBot, ICustomBotOpts} from "./custom-bot"
 
 interface ICreateChannel {
     client: Client;
@@ -26,7 +26,7 @@ export class CustomBotClient extends CustomBot {
         super(options);
     }
 
-    public static async createChannel(props: ICreateChannel) {
+    async createChannel(props: ICreateChannel) {
         try {
             const {client, channelId, message, parentId} = props
             if(!message) {
@@ -63,7 +63,7 @@ export class CustomBotClient extends CustomBot {
         };
     };
 
-    addRoleToUser(message: Message, roleName: string) {
+    async addRoleToUser(message: Message, roleName: string) {
         if(!message) {
             return console.log('[addRoleToUser] Message not found')
         }
@@ -83,7 +83,7 @@ export class CustomBotClient extends CustomBot {
         };
     };
 
-    userHasRole(message: Message, roleName: string) {
+    async userHasRole(message: Message, roleName: string) {
         if(!message) {
             return console.log('[userHasRole] Message not found')
         }
@@ -105,7 +105,7 @@ export class CustomBotClient extends CustomBot {
         return false;
     };
 
-    createEmbed(props: ICreateEmbed) {  
+    async createEmbed(props: ICreateEmbed) {  
         return new MessageEmbed()
             .setTitle(props.title)
             .setColor('DARK_PURPLE')

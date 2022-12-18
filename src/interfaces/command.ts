@@ -1,5 +1,5 @@
 import {BaseCommandInteraction} from "discord.js";
-import {SlashCommandBuilder} from '@discordjs/builders';
+import {SlashCommandBuilder} from "@discordjs/builders";
 import {CustomBotClient} from "../classes/custom-bot-client.class";
 
 export interface CommandDef {

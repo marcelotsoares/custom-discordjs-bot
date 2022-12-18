@@ -1,51 +1,37 @@
-import {CustomBotClient} from "../classes/custom-bot-client.class.js";
-import {StatusResponse} from "../interfaces/configs.js";
-import {BotUserModel} from "../models/bot-user.js";
-import { BuyMarketplace, MarketplaceInfo } from "./marketplace.controller.js";
+import { CustomBotClient } from "../classes/custom-bot-client.class";
+import { NotFoundException } from "../classes/errors";
+import { BotUserModel, InventoryItem } from "../models/bot-user";
+import { ICustomBotClient } from "../interfaces/custom-bot";
+import { ICreateUser, IUserIventory, IUserPayment, UserModel } from "../interfaces/user";
 
-type tryUserPayment = Required<Omit<BuyMarketplace, 'itemId'>>
+export interface IUserConstructor extends ICustomBotClient {
+    botUserModel: typeof BotUserModel;
+}
 
 export class UserController {
-    customBotClient: CustomBotClient;
+    readonly customBotClient: CustomBotClient;
+    
+    readonly #botUserModel: typeof BotUserModel;
 
-    constructor() {}
-
-    async tryGetInventoryItem(props: MarketplaceInfo) {
-        const {discordId, itemId} = props
-
-        console.log(`[tryGetInventoryItem] ${discordId}:${itemId}`);
-        const user = await this.getUserDataByDiscordId(discordId);
-        if(!user) {
-           return false
-        };
-
-
-        const itemInventory = user.inventory.find(u => u.item === itemId);
-        if(!itemInventory) {
-           return false
-        };
-
-        console.log('itemInventory', itemInventory);
-        if(itemInventory.qtd > 0) {
-            itemInventory.qtd--
-            await user.save()
-            return true
-        };
+    constructor(props: IUserConstructor) {
+        this.customBotClient = props.customBotClient
+        this.#botUserModel = props.botUserModel
     };
 
-    async createUsers(discord_id: string, discord_name: string) {
-        const user = await BotUserModel.findOne({ discordId: discord_id });
-
-        if (user) {
-            return {
-                error: true,
-                message: '[level:controller:createUsers] A user with this discordId already exists'
-            }
+    async getUserByDiscordId(discordId: string): Promise<UserModel | never> {
+        const user = await this.#botUserModel.findOne({discordId: discordId})
+        
+        if(!user) {
+            throw new NotFoundException('User with this discordId');
         };
 
-        const tryCreatedUser = await BotUserModel.create({
-            discordId: discord_id,
-            discordName: discord_name,
+        return user
+    };
+
+    async createUser({discordId, discordName}: ICreateUser): Promise<never | void> {
+        await this.#botUserModel.create({
+            discordId: discordId,
+            discordName: discordName,
             services: {
                 membership: {
                     active: false,
@@ -58,64 +44,43 @@ export class UserController {
             inventory: [],
             coins: 0
         });
-
-        console.log(tryCreatedUser);
     };
 
-    async tryUserPayment(props: tryUserPayment): Promise<StatusResponse> {
-        const {discordId, price} = props
+    async tryGetInventoryItem({user, itemId}: IUserIventory): Promise<InventoryItem>  {
+        console.log(`[tryGetInventoryItem] discordName: ${user.discordName} : itemId: ${itemId}`);
 
-        const user = await BotUserModel.findOne({ discordId: discordId });
-        if (!user) {
-            return {
-                message: `User não encontraddo!`,
-                error: true
-            }
+        const itemInventory = user.inventory.find(item => item.itemId === itemId);
+        if(!itemInventory) {
+            throw new NotFoundException("Item with that Id in user's inventory");
         };
 
-        console.log(`[tryPayment] discordId: ${discordId}, item_price: ${price}`);
-        const updateCoins = user.coins - price;
+        return itemInventory
+    };
+
+    async tryUserPayment({user, coins}: IUserPayment): Promise<never | void> {
+        console.log(`[tryPayment] discordId: ${user.discordId}, item_price: ${coins}`);
+        const updateCoins = user.coins - coins;
         console.log(`[tryPayment] updateCoins: ${updateCoins}`);
         if (updateCoins < 0) {
-            return {
-                message: `Não foi possivel realizar o pagamento. userCoins: ${user.coins} - priceItem: ${price}`,
-                error: true
-            }
+            throw new NotFoundException('Coins needed for payment');
         };
 
         user.coins = updateCoins;
 
         await user.save();
-
-        return {
-            message: 'Compra realizada com sucesso!',
-            error: false
-        }
     };
 
-    async getUserDataByDiscordId(discord_id: string) {
-        const user = await BotUserModel.findOne({discordId: discord_id});
-        if(!user) {
-            return false
+    async giveInventoryItem({user, itemId}: IUserIventory): Promise<void> {
+        const foundItem = user.inventory.find(item => item.itemId === itemId)
+        if(!foundItem) {
+            user.inventory.push({
+                itemId: itemId,
+                qtd: 1
+            });
+        } else {
+            foundItem.qtd++
         };
-
-        return user
-    };
-
-    async giveInventoryItem(props: MarketplaceInfo) {
-        const {discordId, itemId} = props
-        const user = await BotUserModel.findOne({discordId: discordId})
-        if (user) {
-            const foundItem = user.inventory.find(u => u.item === itemId)
-            if(!foundItem) {
-                user.inventory.push({
-                    item: itemId,
-                    qtd: 1
-                })
-            } else {
-                foundItem.qtd++
-            }
-            await user.save()
-        };
+        
+        await user.save();
     };
 };

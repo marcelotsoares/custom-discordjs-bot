@@ -1,8 +1,8 @@
-import {Marketplace} from '../../classes/marketplace.class.js'
+import {Marketplace} from '../../classes/marketplace.class'
 import {Client, BaseCommandInteraction} from "discord.js";
-import {CommandDef} from "../../interfaces/command.js";
+import {CommandDef} from "../../interfaces/command";
 import {SlashCommandBuilder} from '@discordjs/builders';
-import { CustomBotClient } from '../../classes/custom-bot-client.class.js';
+import { CustomBotClient } from '../../classes/custom-bot-client.class';
 
 export const command: CommandDef = {
     usage: {

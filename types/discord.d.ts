@@ -1,7 +1,7 @@
 import {Collection, TextChannel} from 'discord.js'
-import {UserController} from "../src/controllers/user.controller.js";
-import {LevelController} from "../src/controllers/level.controller.js";
-import {MarketplaceController} from '../src/controllers/marketplace.controller.js';
+import {UserController} from "../src/controllers/user.controller";
+import {LevelController} from "../src/controllers/level.controller";
+import {MarketplaceController} from '../src/controllers/marketplace.controller';
 
 interface ICommandProps {
     commandName: string;

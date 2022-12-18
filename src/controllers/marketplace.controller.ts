@@ -1,60 +1,37 @@
 import { CustomBotClient } from "../classes/custom-bot-client.class";
-import { MarketplaceConfig } from "../config/marketplace.config.js";
-import { StatusResponse } from "../interfaces/configs";
-
-export type BuyMarketplace = Partial<Pick<IMarketplace, 'itemId' | 'discordId' | 'price'>>
-
-export type MarketplaceInfo = Required<Pick<BuyMarketplace, 'itemId' | 'discordId'>>
+import { MarketplaceConfig } from "../config/marketplace.config";
+import { IMarketplace, MarketplaceItemsConfig, BuyOnMarketplace } from "../interfaces/marketplace";
+import { NotFoundException } from "../classes/errors";
+import { ICustomBotClient } from "interfaces/custom-bot";
 
 export class MarketplaceController {
-    customBotClient: CustomBotClient;
+    readonly customBotClient: CustomBotClient;
 
-    constructor() {}
-
-    async getItemPriceByItemId(itemId: string) {
-        const item = MarketplaceConfig.items.find(item => item.itemId == itemId)
-        if(!item) {
-            return false
-        }
-
-        return item.price
+    constructor(props: ICustomBotClient) {
+        this.customBotClient = props.customBotClient
     }
 
-    async tryToBuyItemOnMarketplace(props: MarketplaceInfo): Promise<StatusResponse> {
-        const {discordId, itemId} = props
-        const client = this.customBotClient
-        const userController = client.userController
-        const user = await userController.getUserDataByDiscordId(discordId)
-        if(!user) {
-            return {
-                message: 'Usuario não encontrado',
-                error: true
-            }
+    async getItemById({ itemId }: Pick<IMarketplace, 'itemId'>): Promise<MarketplaceItemsConfig | never> {
+        const item = MarketplaceConfig.items.find(item => item.itemId == itemId)
+        if(!item) {
+            throw new NotFoundException('Item with this id')
         }
 
-        const priceItem = await this.getItemPriceByItemId(itemId)
-        if(!priceItem) {
-            return {
-                message: 'Não consegui encontrar o preço do item, então não é possivel finalizar com a compra!',
-                error: true
-            }
-        }
+        return item
+    }
 
-        const tryBuyItem = await userController.tryUserPayment({
-            discordId: discordId,
-            price: priceItem
-        });
-        
-        if(tryBuyItem.error) {
-            return {
-                message: tryBuyItem.message,
-                error: true
-            }
-        }
-        
-        return {
-            message: tryBuyItem.message,
-            error: false
+    async tryToBuyItemOnMarketplace({user, itemConfig}: BuyOnMarketplace): Promise<void> {
+        try {
+            const userController = this.customBotClient.userController
+            
+            const payment = await userController.tryUserPayment({
+                user: user,
+                coins: itemConfig.price
+            });
+
+            console.log('payment ->', payment)
+        } catch (error) {
+            throw error
         }
     }
 }

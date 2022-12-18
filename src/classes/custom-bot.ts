@@ -1,14 +1,14 @@
-import {Client, Collection} from 'discord.js';
-import {readdir, lstat} from 'node:fs/promises';
-import {join} from 'node:path';
+import {Client, Collection} from "discord.js";
+import {readdir, lstat} from "node:fs/promises";
+import {join} from "node:path";
 import {CommandDef} from "../interfaces/command";
 import {EventDef} from "../interfaces/events";
 import {LevelController} from "../controllers/level.controller";
 import {UserController} from "../controllers/user.controller";
-import {REST} from '@discordjs/rest';
-import {Routes} from 'discord-api-types/v10';
-import {readdirSync} from 'node:fs';
-import {MarketplaceController} from '../controllers/marketplace.controller';
+import {REST} from "@discordjs/rest";
+import {Routes} from "discord-api-types/v10";
+import {readdirSync} from "node:fs";
+import {MarketplaceController} from "../controllers/marketplace.controller";
 
 export interface ICustomBotOpts {
     discordClient: Client;

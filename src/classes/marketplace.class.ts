@@ -1,6 +1,6 @@
-import {MarketplaceConfig} from '../config/marketplace.config.js'
+import {MarketplaceConfig} from '../config/marketplace.config'
 import {BaseCommandInteraction, Message, MessageActionRow, MessageSelectMenu} from "discord.js";
-import { CustomBotClient } from './custom-bot-client.class.js';
+import { CustomBotClient } from './custom-bot-client.class';
 
 interface ICreateMenuMarketplace {
     embed: any,

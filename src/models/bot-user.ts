@@ -1,6 +1,4 @@
-import typegoose from '@typegoose/typegoose';
-
-const {getModelForClass, prop} = typegoose;
+import {getModelForClass, prop} from '@typegoose/typegoose';
 
 export class Transaction {
     @prop()
@@ -27,7 +25,7 @@ export class Transaction {
 
 export class InventoryItem {
     @prop()
-    item: string;
+    itemId: string;
 
     @prop()
     qtd: number;
@@ -70,14 +68,12 @@ export class BotUser {
 
     @prop({type: () => [InventoryItem], required: true, default: []})
     public inventory!: InventoryItem[];
-
-    @prop({type: () => Services})
-    public services?: Services;
 }
 
 export const BotUserModel = getModelForClass(BotUser, {
     schemaOptions: {
         timestamps: true,
-        collection: 'users'
-    }
+        collection: 'users',
+        strictQuery: true,
+    },
 })

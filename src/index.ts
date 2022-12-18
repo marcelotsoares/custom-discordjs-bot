@@ -11,11 +11,10 @@ import {UserController} from './controllers/user.controller.js'
 import {CustomBotClient} from "./classes/custom-bot-client.class.js";
 import {databaseConfig} from "./config/database.config.js";
 
-import mongoosePkg from "mongoose";
+import {connect} from "mongoose";
 import {MongoDbConfig, DualEnv} from "./interfaces/configs.js";
 import {MarketplaceController} from './controllers/marketplace.controller.js'
-
-const {connect, Types} = mongoosePkg;
+import {BotUserModel} from './models/bot-user'
 
 const discordClientOptions = {
     intents: [
@@ -53,18 +52,24 @@ const main = async () => {
     });
 
     try {
-        const levelController = new LevelController();
-        levelController.customBotClient = customBotClient;
+        const userController = new UserController({
+            customBotClient: customBotClient,
+            botUserModel: BotUserModel
+        });
+        
+        customBotClient.userController = userController;
+        client.userController = userController;
+
+        const levelController = new LevelController({
+            customBotClient: customBotClient
+        });
         customBotClient.levelController = levelController;
         client.levelController = levelController;
         
-        const userController = new UserController();
-        userController.customBotClient = customBotClient;
-        customBotClient.userController = userController;
-        client.userController = userController;
-        
-        const marketplaceController = new MarketplaceController();
-        marketplaceController.customBotClient = customBotClient;
+        const marketplaceController = new MarketplaceController({
+            customBotClient: customBotClient
+        });
+
         customBotClient.marketplaceController = marketplaceController;
         client.marketplaceController = marketplaceController;
 
@@ -104,13 +109,13 @@ const main = async () => {
     });
 
     client.on('interactionCreate', async (interaction) => {
-        const user = interaction.user
-        const userId = user.id
+        const userByInteraction = interaction.user
+        const userId = userByInteraction.id
         
         if(interaction.isCommand()) {
             const commandName = interaction.commandName
             const data = {
-                discordName: `${user.username}#${user.discriminator}`, 
+                discordName: `${userByInteraction.username}#${userByInteraction.discriminator}`, 
                 guildName: interaction.guild!.name,
                 command: commandName,
                 guildId: interaction.guild!.id,
@@ -130,33 +135,38 @@ const main = async () => {
             const interactionId = interaction.customId
             
             if(interactionId == 'Marketplace_Menu') {
-                const user = interaction.user
-                const itemId = interaction.values[0]
-                const discordId = user.id
+                try {
+                    const itemId = interaction.values[0]
+                    const discordId = userByInteraction.id
+                    
+                    const userController = customBotClient.userController
+                    const user = await userController.getUserByDiscordId(discordId)
 
-                const tryBuyItem = await customBotClient.marketplaceController.tryToBuyItemOnMarketplace({
-                    discordId: discordId,
-                    itemId: itemId
-                })
+                    const marketplaceController = customBotClient.marketplaceController
 
-                await interaction.reply(tryBuyItem.message);
+                    const itemConfig = await marketplaceController.getItemById({ itemId })
 
-                await customBotClient.delay(5000);
+                    await marketplaceController.tryToBuyItemOnMarketplace({
+                        user: user,
+                        itemConfig: itemConfig
+                    })
 
-                await interaction.deleteReply();
+                    await interaction.reply('Item comprado com sucessso!');
 
-                if(tryBuyItem.error) {
-                    console.log(`[tryBuyItem:error] userId: ${userId} - Message: ${tryBuyItem.message}`)
-                    return
+                    await customBotClient.delay(5000);
+
+                    await interaction.deleteReply();
+
+                    await customBotClient.userController.giveInventoryItem({
+                        user: user,
+                        itemId: itemId
+                    });
+
+                } catch (error) {
+                    console.log(error)
                 }
-
-                await customBotClient.userController.giveInventoryItem({
-                    discordId: discordId,
-                    itemId: itemId
-                })
-
-
-            }   
+                
+            }
         };
     });
 

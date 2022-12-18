@@ -1,4 +1,4 @@
-import {MongoDbConfig, DualEnv} from "../interfaces/configs.js";
+import {MongoDbConfig, DualEnv} from "../interfaces/configs";
 
 export const databaseConfig: DualEnv<MongoDbConfig> = {
     prod: {
