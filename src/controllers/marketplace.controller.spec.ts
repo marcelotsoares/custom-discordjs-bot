@@ -1,15 +1,10 @@
 import { MarketplaceConfig } from "../config/marketplace.config";
 import { MarketplaceController } from "./marketplace.controller";
 import { MarketplaceItemsConfig } from "../interfaces/marketplace"
-import { UserController } from "../controllers/user.controller";
 import { mockBotUser } from "../models/__mocks__/bot-user.mock";
 import { UserModel } from "../interfaces/user"
-
 import { CustomBotClient } from '../classes/custom-bot-client.class';
-import { Client } from "discord.js";
 import { NotFoundException } from "../classes/errors";
-jest.mock('discord.js')
-
 
 const buildMarketplaceController = async () => {
     const mockCustomBotClient = {
