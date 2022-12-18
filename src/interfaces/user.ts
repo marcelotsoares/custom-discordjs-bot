@@ -12,7 +12,6 @@ export interface ICreateUser {
 }
 
 export interface IUserIventory extends IUser {
-    user: UserModel;
     itemId: string;
 }
 
