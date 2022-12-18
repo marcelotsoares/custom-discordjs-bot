@@ -1,46 +1,39 @@
-import {MarketplaceConfig} from '../config/marketplace.config'
-import {BaseCommandInteraction, Message, MessageActionRow, MessageSelectMenu} from "discord.js";
+import { MarketplaceConfig } from '../config/marketplace.config';
+import { BaseCommandInteraction, MessageActionRow, MessageSelectMenu } from 'discord.js';
 import { CustomBotClient } from './custom-bot-client.class';
-
-interface ICreateMenuMarketplace {
-    embed: any,
-    rowSelectMenu: any
-}
+import { ICreateMenuMarketplace } from 'interfaces/marketplace';
 
 export class Marketplace {
     interaction: BaseCommandInteraction;
     customBotClient: CustomBotClient;
 
     constructor(customBotClient: CustomBotClient, interaction: BaseCommandInteraction) {
-        this.customBotClient = customBotClient
-        this.interaction = interaction
+        this.customBotClient = customBotClient;
+        this.interaction = interaction;
     }
 
     async buildSelectMenuMarketplace() {
-        const row = new MessageActionRow()
+        const row = new MessageActionRow();
 
-        const dataOptions = []
+        const dataOptions = [];
 
-        for(const data of MarketplaceConfig.items) {
+        for (const data of MarketplaceConfig.items) {
             dataOptions.push({
                 label: `${data.itemName} - Price: ${data.price} Coins`,
                 description: data.description,
-                value: data.itemId
-            })
+                value: data.itemId,
+            });
         }
 
-        const selectMenu = new MessageSelectMenu()
-            .setCustomId('Marketplace_Menu')
-            .setPlaceholder('Nothing selected')
-            .addOptions(dataOptions)
-        
-        row.addComponents(selectMenu)
+        const selectMenu = new MessageSelectMenu().setCustomId('Marketplace_Menu').setPlaceholder('Nothing selected').addOptions(dataOptions);
 
-        return row
+        row.addComponents(selectMenu);
+
+        return row;
     }
 
     async createMarketplaceMenu(): Promise<ICreateMenuMarketplace> {
-        const rowSelectMenu = await this.buildSelectMenuMarketplace()
+        const rowSelectMenu = await this.buildSelectMenuMarketplace();
 
         const embedMarketplace = await this.customBotClient.createEmbed({
             title: 'Marketplace',
@@ -52,15 +45,15 @@ export class Marketplace {
                 *- Caso deseja saber quantas **Coins** você tem use o comando \`/perfil\`*
             `,
             guild: {
-                name: this.interaction.guild?.name!,
-                id: this.interaction.guild?.id!,
-                icon: this.interaction.guild?.icon!
-            }
-        })
+                name: this.interaction.guild?.name ?? 'Guild name not found',
+                id: this.interaction.guild?.id ?? 'Guild id not found',
+                icon: this.interaction.guild?.icon ?? 'Guild icon not found',
+            },
+        });
 
         return {
             embed: embedMarketplace,
-            rowSelectMenu: rowSelectMenu
-        }
+            rowSelectMenu: rowSelectMenu,
+        };
     }
 }

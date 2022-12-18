@@ -1,26 +1,22 @@
-import { UserModel } from "./user";
+import { MessageEmbed, MessageActionRow } from 'discord.js';
+import { IUser } from './user';
 
 export interface IMarketplace {
-	discordId: string;
-	itemId: string;
-	itemName: string;
-	description: string;
-	price: number;
+    itemId: string;
+    itemName: string;
+    description: string;
+    price: number;
 }
-
-export interface ITryBuyOnMarketplace extends IMarketplace {
-	user: UserModel
-	itemConfig: MarketplaceItemsConfig
-}
-
-export type BuyOnMarketplace = Pick<ITryBuyOnMarketplace, 'user' | 'itemConfig'>
-
-export type MarketplaceItemsConfig = Pick<IMarketplace, 'itemId' | 'itemName' | 'description' | 'price'>
-
-export type PurchaseDataMarketplace = Partial<Pick<IMarketplace, 'itemId' | 'discordId' | 'price'>>
-
-export type BuyerDataMarketplace = Required<Pick<PurchaseDataMarketplace, 'itemId' | 'discordId'>>
 
 export interface IMarketplaceConfig {
-	items: Array<MarketplaceItemsConfig>
+    items: Array<IMarketplace>;
 }
+
+export interface ICreateMenuMarketplace {
+    embed: MessageEmbed;
+    rowSelectMenu: MessageActionRow;
+}
+
+export type MarketplaceBuyItem = Pick<IMarketplace, 'price'>;
+
+export interface IMarketplaceBuyItem extends MarketplaceBuyItem, IUser {}

@@ -1,6 +1,6 @@
-import {BaseCommandInteraction} from "discord.js";
-import {SlashCommandBuilder} from "@discordjs/builders";
-import {CustomBotClient} from "../classes/custom-bot-client.class";
+import { BaseCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { CustomBotClient } from '../classes/custom-bot-client.class';
 
 export interface CommandDef {
     usage: {
@@ -11,7 +11,7 @@ export interface CommandDef {
         aliases?: string[];
         roleRequired?: boolean;
         roleName?: string;
-    },
-    data: SlashCommandBuilder,
-    run: (customBotClient: CustomBotClient, interaction: BaseCommandInteraction) => Promise<void>
+    };
+    data: SlashCommandBuilder;
+    run: (customBotClient: CustomBotClient, interaction: BaseCommandInteraction) => Promise<void>;
 }

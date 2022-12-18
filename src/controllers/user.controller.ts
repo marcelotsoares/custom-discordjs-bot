@@ -1,8 +1,13 @@
-import { CustomBotClient } from "../classes/custom-bot-client.class";
-import { NotFoundException } from "../classes/errors";
-import { BotUserModel, InventoryItem } from "../models/bot-user";
-import { ICustomBotClient } from "../interfaces/custom-bot";
-import { ICreateUser, IUserIventory, IUserPayment, UserModel } from "../interfaces/user";
+import { CustomBotClient } from '../classes/custom-bot-client.class';
+import { NotFoundException } from '../classes/errors';
+import { BotUserModel, InventoryItem } from '../models/bot-user';
+import { ICustomBotClient } from '../interfaces/custom-bot';
+import {
+    ICreateUser,
+    IUserIventory,
+    IUserPayment,
+    UserModel,
+} from '../interfaces/user';
 
 export interface IUserConstructor extends ICustomBotClient {
     botUserModel: typeof BotUserModel;
@@ -10,25 +15,28 @@ export interface IUserConstructor extends ICustomBotClient {
 
 export class UserController {
     readonly customBotClient: CustomBotClient;
-    
+
     readonly #botUserModel: typeof BotUserModel;
 
     constructor(props: IUserConstructor) {
-        this.customBotClient = props.customBotClient
-        this.#botUserModel = props.botUserModel
-    };
+        this.customBotClient = props.customBotClient;
+        this.#botUserModel = props.botUserModel;
+    }
 
     async getUserByDiscordId(discordId: string): Promise<UserModel | never> {
-        const user = await this.#botUserModel.findOne({discordId: discordId})
-        
-        if(!user) {
+        const user = await this.#botUserModel.findOne({ discordId: discordId });
+
+        if (!user) {
             throw new NotFoundException('User with this discordId');
-        };
+        }
 
-        return user
-    };
+        return user;
+    }
 
-    async createUser({discordId, discordName}: ICreateUser): Promise<never | void> {
+    async createUser({
+        discordId,
+        discordName,
+    }: ICreateUser): Promise<never | void> {
         await this.#botUserModel.create({
             discordId: discordId,
             discordName: discordName,
@@ -36,51 +44,56 @@ export class UserController {
                 membership: {
                     active: false,
                     expiration: new Date(0),
-                    transactions: []
+                    transactions: [],
                 },
             },
             xp: 0,
             level: 1,
             inventory: [],
-            coins: 0
+            coins: 0,
         });
-    };
+    }
 
-    async tryGetInventoryItem({user, itemId}: IUserIventory): Promise<InventoryItem>  {
-        console.log(`[tryGetInventoryItem] discordName: ${user.discordName} : itemId: ${itemId}`);
+    async tryGetInventoryItem({
+        user,
+        itemId,
+    }: IUserIventory): Promise<InventoryItem> {
+        const itemInventory = user.inventory.find(
+            (item) => item.itemId === itemId
+        );
 
-        const itemInventory = user.inventory.find(item => item.itemId === itemId);
-        if(!itemInventory) {
-            throw new NotFoundException("Item with that Id in user's inventory");
-        };
+        if (!itemInventory) {
+            throw new NotFoundException(
+                "Item with that Id in user's inventory"
+            );
+        }
 
-        return itemInventory
-    };
+        return itemInventory;
+    }
 
-    async tryUserPayment({user, coins}: IUserPayment): Promise<never | void> {
-        console.log(`[tryPayment] discordId: ${user.discordId}, item_price: ${coins}`);
+    async tryUserPayment({ user, coins }: IUserPayment): Promise<never | void> {
         const updateCoins = user.coins - coins;
-        console.log(`[tryPayment] updateCoins: ${updateCoins}`);
+
         if (updateCoins < 0) {
             throw new NotFoundException('Coins needed for payment');
-        };
+        }
 
         user.coins = updateCoins;
 
         await user.save();
-    };
+    }
 
-    async giveInventoryItem({user, itemId}: IUserIventory): Promise<void> {
-        const foundItem = user.inventory.find(item => item.itemId === itemId)
-        if(!foundItem) {
+    async giveInventoryItem({ user, itemId }: IUserIventory): Promise<void> {
+        const foundItem = user.inventory.find((item) => item.itemId === itemId);
+        if (!foundItem) {
             user.inventory.push({
                 itemId: itemId,
-                qtd: 1
+                qtd: 1,
             });
         } else {
-            foundItem.qtd++
-        };
-        
+            foundItem.qtd++;
+        }
+
         await user.save();
-    };
-};
+    }
+}

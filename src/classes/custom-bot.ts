@@ -1,14 +1,14 @@
-import {Client, Collection} from "discord.js";
-import {readdir, lstat} from "node:fs/promises";
-import {join} from "node:path";
-import {CommandDef} from "../interfaces/command";
-import {EventDef} from "../interfaces/events";
-import {LevelController} from "../controllers/level.controller";
-import {UserController} from "../controllers/user.controller";
-import {REST} from "@discordjs/rest";
-import {Routes} from "discord-api-types/v10";
-import {readdirSync} from "node:fs";
-import {MarketplaceController} from "../controllers/marketplace.controller";
+import { Client, Collection } from 'discord.js';
+import { readdir, lstat } from 'node:fs/promises';
+import { join } from 'node:path';
+import { CommandDef } from '../interfaces/command';
+import { EventDef } from '../interfaces/events';
+import { LevelController } from '../controllers/level.controller';
+import { UserController } from '../controllers/user.controller';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
+import { readdirSync } from 'node:fs';
+import { MarketplaceController } from '../controllers/marketplace.controller';
 
 export interface ICustomBotOpts {
     discordClient: Client;
@@ -19,7 +19,7 @@ export class CustomBot {
 
     eventModules: any[];
     commandModules: any[];
-    
+
     // injected controllers
     levelController: LevelController;
     userController: UserController;
@@ -31,11 +31,11 @@ export class CustomBot {
 
         this.discordClient = options.discordClient;
         this.discordClient.botUsers = new Map();
-    };
+    }
 
     async loadEvents(path: string) {
         try {
-            const eventFiles = await readdirSync(join('dist', path)).filter(file => file.endsWith('.event.js'));
+            const eventFiles = await readdirSync(join('dist', path)).filter((file) => file.endsWith('.event.js'));
             console.log(`[classes:custom-bot:loadEvents] carregando eventos...`);
             for (const file of eventFiles) {
                 const eventPath = join('..', path, file).replace('\\', '/');
@@ -44,38 +44,31 @@ export class CustomBot {
                     this.eventModules.push(eventModule);
                     try {
                         if (eventModule.executeOnce) {
-                            this.discordClient.once(
-                                eventModule.name,
-                                eventModule.handler.bind(null, this.discordClient)
-                            );
+                            this.discordClient.once(eventModule.name, eventModule.handler.bind(null, this.discordClient));
                         } else {
-                            this.discordClient.on(
-                                eventModule.name,
-                                eventModule.handler.bind(null, this.discordClient)
-                            );
-                        };
+                            this.discordClient.on(eventModule.name, eventModule.handler.bind(null, this.discordClient));
+                        }
                     } catch (error) {
                         console.log(`[classes:custom-bot:loadEvents] Não foi possível carregar o evento ${eventModule.name} : ${error}`);
-                    };
-                };
-            };
+                    }
+                }
+            }
             console.log(`[classes:custom-bot:loadEvents] Loaded events: ${this.eventModules.length}`);
-            
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    };
+    }
 
     async loadCommands(path: string) {
-        if(!process.env.APPLICATION_ID) {
-            throw new Error("classes:custom-bot:[loadCommands:error] Application_ID was not defined in the process env!");
+        if (!process.env.APPLICATION_ID) {
+            throw new Error('classes:custom-bot:[loadCommands:error] Application_ID was not defined in the process env!');
         }
-       
-        if(!process.env.GUILD_ID) {
-            throw new Error('classes:custom-bot:[loadCommands:error] Guild_ID was not defined in the process env!')
+
+        if (!process.env.GUILD_ID) {
+            throw new Error('classes:custom-bot:[loadCommands:error] Guild_ID was not defined in the process env!');
         }
-        
-        console.log(`[classes:custom-bot:loadCommands] path: ${path}`)
+
+        console.log(`[classes:custom-bot:loadCommands] path: ${path}`);
         if (!this.discordClient.commands) {
             this.discordClient.commands = new Collection();
         }
@@ -85,19 +78,16 @@ export class CustomBot {
         console.log(`[classes:custom-bot:loadCommands] commandFolders: ${commandFolders}`);
 
         for (const folder of commandFolders) {
-
             console.log(`[classes:custom-bot:loadCommands] folder: ${folder}`);
             const targetDirectoryPath = join('dist', path, folder);
             console.log(`[classes:custom-bot:loadCommands] targetDirectoryPath: ${targetDirectoryPath}`);
-            
-            if ((await lstat(targetDirectoryPath)).isDirectory()) {
 
+            if ((await lstat(targetDirectoryPath)).isDirectory()) {
                 const directoryCommands = await readdir(targetDirectoryPath);
                 console.log(`[classes:custom-bot:loadCommands] directoryCommands: ${directoryCommands}`);
                 const moduleFolderPath = join('..', path, folder).replace('\\', '/');
                 console.log(`[classes:custom-bot:loadCommands] moduleFolderPath: ${moduleFolderPath}, folder: ${folder}`);
                 for (const commandFolder of directoryCommands) {
-
                     console.log(`commandFolder: ${commandFolder}`);
                     if (commandFolder.endsWith('.command.js')) {
                         const module = join(moduleFolderPath, commandFolder).replace('\\', '/');
@@ -108,42 +98,42 @@ export class CustomBot {
 
                         this.commandModules.push(commandModule);
                         this.discordClient.commands.set(commandModule.usage.commandName, commandModule);
-                    };
-                };
-            };
-        };
+                    }
+                }
+            }
+        }
 
-        await this.loadSlashCommands()
-    };
+        await this.loadSlashCommands();
+    }
 
     async loadSlashCommands() {
         const rest = new REST({ version: '10' }).setToken(process.env.TOKEN || '');
 
         try {
             const commandData = this.discordClient.commands?.map((commandInfo) => {
-                console.log('commandInfo', commandInfo)
-                return commandInfo.data.toJSON()
-            })
-            console.log('commandData: ', commandData)
+                console.log('commandInfo', commandInfo);
+                return commandInfo.data.toJSON();
+            });
+            console.log('commandData: ', commandData);
             console.log('[classes:custom-bot:loadSlashCommands] Started refreshing application (/) commands.');
 
-            rest.put(Routes.applicationGuildCommands(process.env.APPLICATION_ID!, process.env.GUILD_ID!),
-            { 
-                body: commandData
-            }).then(() => {
-                console.log('[classes:custom-bot:loadSlashCommands] Successfully reloaded application (/) commands.');
-            }).catch((error) =>{
-                console.log(`[classes:custom-bot:loadSlashCommands] Error load commands. ${error}`);
-            });
-
+            rest.put(Routes.applicationGuildCommands(process.env.APPLICATION_ID!, process.env.GUILD_ID!), {
+                body: commandData,
+            })
+                .then(() => {
+                    console.log('[classes:custom-bot:loadSlashCommands] Successfully reloaded application (/) commands.');
+                })
+                .catch((error) => {
+                    console.log(`[classes:custom-bot:loadSlashCommands] Error load commands. ${error}`);
+                });
         } catch (error) {
             console.log(error);
-        };
+        }
 
         console.log(`[classes:custom-bot:loadSlashCommands] SlashCommands carregados: ${this.commandModules.length}`);
     }
 
     delay(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    };
-};
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+}

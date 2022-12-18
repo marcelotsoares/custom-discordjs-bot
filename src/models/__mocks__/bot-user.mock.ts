@@ -1,7 +1,7 @@
-import { BotUser } from "../../models/bot-user"
+import { BotUser } from '../../models/bot-user';
 
 interface IBotUserMock extends BotUser {
-    save: jest.Mock
+    save: jest.Mock;
 }
 
 const mockBotUser: IBotUserMock = {
@@ -10,21 +10,20 @@ const mockBotUser: IBotUserMock = {
     xp: 0,
     level: 1,
     coins: 1,
-    inventory: [{
-        itemId: "ticket_2",
-        qtd: 5
-    }],
+    inventory: [
+        {
+            itemId: 'ticket_2',
+            qtd: 5,
+        },
+    ],
     save: jest.fn().mockImplementation(() => {
-        return true
-    })
-}
+        return true;
+    }),
+};
 
 const mockBotUserModel = {
     findOne: jest.fn(),
-    create: jest.fn()
-}
+    create: jest.fn(),
+};
 
-export {
-    mockBotUser,
-    mockBotUserModel
-}
+export { mockBotUser, mockBotUserModel };

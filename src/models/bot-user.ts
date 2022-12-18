@@ -1,4 +1,4 @@
-import {getModelForClass, prop} from '@typegoose/typegoose';
+import { getModelForClass, prop } from '@typegoose/typegoose';
 
 export class Transaction {
     @prop()
@@ -16,7 +16,7 @@ export class Transaction {
     @prop()
     public amount: number;
 
-    @prop({default: 0})
+    @prop({ default: 0 })
     public status: number;
 
     @prop()
@@ -41,32 +41,32 @@ export class MembershipService {
     @prop()
     public region: string;
 
-    @prop({type: () => [Transaction]})
+    @prop({ type: () => [Transaction] })
     public transactions: Transaction[];
 }
 
 export class Services {
-    @prop({type: () => MembershipService})
+    @prop({ type: () => MembershipService })
     membership?: MembershipService;
 }
 
 export class BotUser {
-    @prop({unique: true})
+    @prop({ unique: true })
     public discordId: string;
 
-    @prop({index: true})
+    @prop({ index: true })
     public discordName: string;
 
-    @prop({index: true})
+    @prop({ index: true })
     public xp: number;
 
-    @prop({index: true})
+    @prop({ index: true })
     public level: number;
 
-    @prop({index: true})
+    @prop({ index: true })
     public coins: number;
 
-    @prop({type: () => [InventoryItem], required: true, default: []})
+    @prop({ type: () => [InventoryItem], required: true, default: [] })
     public inventory!: InventoryItem[];
 }
 
@@ -76,4 +76,4 @@ export const BotUserModel = getModelForClass(BotUser, {
         collection: 'users',
         strictQuery: true,
     },
-})
+});

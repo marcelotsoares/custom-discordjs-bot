@@ -3,6 +3,6 @@ export interface MongoDbConfig {
 }
 
 export interface DualEnv<T> {
-    prod: T
-    dev: T
+    prod: T;
+    dev: T;
 }

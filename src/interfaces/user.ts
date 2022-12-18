@@ -1,6 +1,6 @@
-import { Document, Types } from "mongoose";
-import { BeAnObject, IObjectWithTypegooseFunction } from "@typegoose/typegoose/lib/types";
-import { BotUser } from "models/bot-user";
+import { Document, Types } from 'mongoose';
+import { BeAnObject, IObjectWithTypegooseFunction } from '@typegoose/typegoose/lib/types';
+import { BotUser } from 'models/bot-user';
 
 export interface IUser {
     user: UserModel;
@@ -23,6 +23,8 @@ export interface IUserLevel extends IUser {
     messageLength: number;
 }
 
-export type UserModel = Document<any, BeAnObject, BotUser> & BotUser & IObjectWithTypegooseFunction & {
-    _id: Types.ObjectId;
-}
+export type UserModel = Document<any, BeAnObject, BotUser> &
+    BotUser &
+    IObjectWithTypegooseFunction & {
+        _id: Types.ObjectId;
+    };
