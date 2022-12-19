@@ -4,19 +4,17 @@ import { LevelController } from '../controllers/level.controller';
 import { UserModel } from '../interfaces/user';
 import { mockBotUser } from '../models/__mocks__/bot-user.mock';
 
+jest.mock('../classes/custom-bot-client.class');
+
 const buildLevelController = () => {
-    const mockCustomBotClient = {
-        userController: {
-            getUserByDiscordId: jest.fn(),
-        },
-    };
+    const CustomBotClientMock = CustomBotClient as jest.Mock<CustomBotClient>;
+    const customBotClientMocked = new CustomBotClientMock() as jest.Mocked<CustomBotClient>;
 
     const levelController = new LevelController({
-        customBotClient: mockCustomBotClient as unknown as CustomBotClient,
+        customBotClient: customBotClientMocked,
     });
 
     return {
-        mockCustomBotClient,
         levelController,
     };
 };
