@@ -2,6 +2,7 @@ import { MarketplaceConfig } from '../config/marketplace.config';
 import { BaseCommandInteraction, MessageActionRow, MessageSelectMenu } from 'discord.js';
 import { CustomBotClient } from './custom-bot-client.class';
 import { ICreateMenuMarketplace } from 'interfaces/marketplace';
+import { NotFoundException } from './errors';
 
 export class Marketplace {
     interaction: BaseCommandInteraction;
@@ -35,6 +36,11 @@ export class Marketplace {
     async createMarketplaceMenu(): Promise<ICreateMenuMarketplace> {
         const rowSelectMenu = await this.buildSelectMenuMarketplace();
 
+        if (!this.interaction.guild) {
+            throw new NotFoundException('Interaction guild');
+        }
+
+        const { name, id, icon } = this.interaction.guild;
         const embedMarketplace = await this.customBotClient.createEmbed({
             title: 'Marketplace',
             description: `
@@ -45,9 +51,9 @@ export class Marketplace {
                 *- Caso deseja saber quantas **Coins** você tem use o comando \`/perfil\`*
             `,
             guild: {
-                name: this.interaction.guild?.name ?? 'Guild name not found',
-                id: this.interaction.guild?.id ?? 'Guild id not found',
-                icon: this.interaction.guild?.icon ?? 'Guild icon not found',
+                name: name,
+                id: id,
+                icon: icon || '',
             },
         });
 

@@ -104,16 +104,16 @@ export class CustomBotClient extends CustomBot {
         return false;
     }
 
-    async createEmbed(props: ICreateEmbed) {
+    async createEmbed({ title, description, guild }: ICreateEmbed) {
         return new MessageEmbed()
-            .setTitle(props.title)
+            .setTitle(title)
             .setColor('DARK_PURPLE')
-            .setDescription(String(props.description))
+            .setDescription(String(description))
             .setTimestamp()
-            .setThumbnail(`https://cdn.discordapp.com/icons/${props.guild.id}/${props.guild.icon}`)
+            .setThumbnail(`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}`)
             .setFooter({
-                text: props.guild.name,
-                iconURL: `https://cdn.discordapp.com/icons/${props.guild.id}/${props.guild.icon}`,
+                text: guild.name,
+                iconURL: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}`,
             });
     }
 }
