@@ -17,8 +17,8 @@ export interface ICustomBotOpts {
 export class CustomBot {
     discordClient: Client;
 
-    eventModules: any[];
-    commandModules: any[];
+    eventModules: EventDef[];
+    commandModules: CommandDef[];
 
     // injected controllers
     levelController: LevelController;
@@ -60,14 +60,6 @@ export class CustomBot {
     }
 
     async loadCommands(path: string) {
-        if (!process.env.APPLICATION_ID) {
-            throw new Error('classes:custom-bot:[loadCommands:error] Application_ID was not defined in the process env!');
-        }
-
-        if (!process.env.GUILD_ID) {
-            throw new Error('classes:custom-bot:[loadCommands:error] Guild_ID was not defined in the process env!');
-        }
-
         console.log(`[classes:custom-bot:loadCommands] path: ${path}`);
         if (!this.discordClient.commands) {
             this.discordClient.commands = new Collection();
@@ -102,11 +94,9 @@ export class CustomBot {
                 }
             }
         }
-
-        await this.loadSlashCommands();
     }
 
-    async loadSlashCommands() {
+    async loadSlashCommands(applicationId: string, guildId: string) {
         const rest = new REST({ version: '10' }).setToken(process.env.TOKEN || '');
 
         try {
@@ -117,7 +107,7 @@ export class CustomBot {
             console.log('commandData: ', commandData);
             console.log('[classes:custom-bot:loadSlashCommands] Started refreshing application (/) commands.');
 
-            rest.put(Routes.applicationGuildCommands(process.env.APPLICATION_ID!, process.env.GUILD_ID!), {
+            rest.put(Routes.applicationGuildCommands(applicationId, guildId), {
                 body: commandData,
             })
                 .then(() => {

@@ -32,11 +32,19 @@ if (process.env.NODE_ENV === 'prod') {
     NODE_ENV = 'prod';
 }
 
-if (process.env.TOKEN == null) {
-    throw new NotFoundException('The token');
-}
-
 const main = async () => {
+    if (!process.env.TOKEN) {
+        throw new NotFoundException('The token');
+    }
+
+    if (!process.env.GUILD_ID) {
+        throw new NotFoundException('Guild_ID');
+    }
+
+    if (!process.env.APPLICATION_ID) {
+        throw new NotFoundException('Application_ID');
+    }
+
     const dbConfig = databaseConfig[NODE_ENV as keyof DualEnv<any>] as MongoDbConfig;
 
     // mongodb
@@ -81,6 +89,7 @@ const main = async () => {
 
     try {
         await customBotClient.loadCommands('commands');
+        await customBotClient.loadSlashCommands(process.env.APPLICATION_ID, process.env.GUILD_ID);
     } catch (error) {
         if (error instanceof Error) {
             console.log(`Failed to load commands - ${error.message}`);
