@@ -1,17 +1,6 @@
 import { MessageEmbed } from 'discord.js';
+import { ICreateEmbed } from '../interfaces/custom-bot';
 import { CustomBot, ICustomBotOpts } from './custom-bot';
-
-interface IGuildObject {
-    name: string;
-    id: string;
-    icon: string;
-}
-
-interface ICreateEmbed {
-    title: string;
-    description: string;
-    guild: IGuildObject;
-}
 
 export class CustomBotClient extends CustomBot {
     constructor(options: ICustomBotOpts) {
