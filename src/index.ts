@@ -15,6 +15,7 @@ import { MongoDbConfig, DualEnv } from './interfaces/configs.js';
 import { MarketplaceController } from './controllers/marketplace.controller.js';
 import { BotUserModel } from './models/bot-user';
 import { NotFoundException } from './classes/errors.js';
+import { CommandDef } from 'interfaces/command.js';
 
 const discordClientOptions = {
     intents: [
@@ -115,10 +116,11 @@ const main = async () => {
     client.on('interactionCreate', async (interaction) => {
         const userByInteraction = interaction.user;
         const userId = userByInteraction.id;
-
+        const discordClient = customBotClient.discordClient;
         if (interaction.isCommand()) {
             const commandName = interaction.commandName;
             const guild = interaction.guild;
+            const discordId = interaction.user.id;
 
             if (guild == null) {
                 throw new NotFoundException('Interaction guild');
@@ -135,11 +137,60 @@ const main = async () => {
             console.log(id);
             console.log(`[index:interactionCreate] ${JSON.stringify(data)}`);
 
-            console.log(customBotClient.discordClient.commands?.get(commandName));
+            console.log(discordClient.commands?.get(commandName));
 
-            const command = customBotClient.discordClient.commands?.get(commandName);
+            const clientCommands = discordClient.commands;
+            if (clientCommands) {
+                const command: CommandDef = clientCommands.get(commandName);
+                const usage = command.usage;
+                if (usage.channelId && usage.channelId.length) {
+                    if (!usage.channelId.includes(interaction.channelId)) {
+                        let channels = '';
+                        usage.channelId.map((id) => {
+                            channels += `<#${id}> `;
+                        });
 
-            await command.run(customBotClient, interaction);
+                        await interaction.reply(`this command can only be used on the following channels: ${channels}`);
+
+                        return;
+                    }
+                }
+
+                const user = discordClient.botUsers.get(discordId);
+                console.log(user);
+
+                if (user) {
+                    const userCommand = user.commands.find((props) => props.commandName === commandName);
+                    console.log(`[Command:marketplace] userCommand: ${JSON.stringify(userCommand)}`);
+                    if (userCommand) {
+                        const date = new Date();
+                        const cooldownSeconds = Math.abs((date.getTime() - userCommand.lastTimeCommandWasExec) / 1000);
+                        const cooldownMinutes = Math.floor(cooldownSeconds / 60);
+                        if (date.getTime() < userCommand.lastTimeCommandWasExec) {
+                            await interaction.reply({
+                                content: `Command cooldown **${cooldownMinutes} minute(s) and ${cooldownSeconds.toFixed(
+                                    2
+                                )} seconds**`,
+                                ephemeral: true,
+                            });
+                            return;
+                        }
+                    }
+                }
+
+                console.log(`[Command:marketplace] Command executed successfully by discordId: ${discordId}`);
+
+                discordClient.botUsers.set(discordId, {
+                    commands: [
+                        {
+                            commandName: commandName,
+                            lastTimeCommandWasExec: new Date().getTime() + command.usage.timeToUseCommandInMilliseconds,
+                        },
+                    ],
+                });
+
+                await command.run(customBotClient, interaction);
+            }
         }
 
         if (interaction.isSelectMenu()) {

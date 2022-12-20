@@ -42,9 +42,9 @@ describe('levelController', () => {
     describe('giveExpToUserByMessage', () => {
         it('should be able give exp to user', async () => {
             const { levelController } = buildLevelController();
-            const message = 'Hello, World!';
 
             const user = mockBotUser as unknown as UserModel;
+            const message = 'Hello, World!';
             const giveExpToUser = await levelController.giveExpToUserByMessage({
                 user: user,
                 messageLength: message.length,
@@ -55,11 +55,11 @@ describe('levelController', () => {
 
         it('should be possible to pass the level', async () => {
             const { levelController } = buildLevelController();
-            const message = 'Hello, World!';
 
             const user = mockBotUser as unknown as UserModel;
             user.xp = 5000;
 
+            const message = 'Hello, World!';
             const giveExpToUser = await levelController.giveExpToUserByMessage({
                 user: user,
                 messageLength: message.length,
