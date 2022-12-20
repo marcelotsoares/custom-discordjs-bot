@@ -15,7 +15,7 @@ import { MongoDbConfig, DualEnv } from './interfaces/configs.js';
 import { MarketplaceController } from './controllers/marketplace.controller.js';
 import { BotUserModel } from './models/bot-user';
 import { NotFoundException } from './classes/errors.js';
-import { CommandDef } from 'interfaces/command.js';
+import { CommandDef } from './interfaces/command.js';
 
 const discordClientOptions = {
     intents: [

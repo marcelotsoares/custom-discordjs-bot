@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 import { BeAnObject, IObjectWithTypegooseFunction } from '@typegoose/typegoose/lib/types';
-import { BotUser } from 'models/bot-user';
+import { BotUser } from '../models/bot-user';
 
 export interface IUser {
     user: UserModel;

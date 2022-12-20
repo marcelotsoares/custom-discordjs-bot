@@ -1,7 +1,7 @@
 import { MarketplaceConfig } from '../config/marketplace.config';
 import { BaseCommandInteraction, MessageActionRow, MessageSelectMenu } from 'discord.js';
 import { CustomBotClient } from './custom-bot-client.class';
-import { ICreateMenuMarketplace } from 'interfaces/marketplace';
+import { ICreateMenuMarketplace } from '../interfaces/marketplace';
 import { NotFoundException } from './errors';
 
 export class Marketplace {
@@ -26,7 +26,10 @@ export class Marketplace {
             });
         }
 
-        const selectMenu = new MessageSelectMenu().setCustomId('Marketplace_Menu').setPlaceholder('Nothing selected').addOptions(dataOptions);
+        const selectMenu = new MessageSelectMenu()
+            .setCustomId('Marketplace_Menu')
+            .setPlaceholder('Nothing selected')
+            .addOptions(dataOptions);
 
         row.addComponents(selectMenu);
 

@@ -1,7 +1,7 @@
 import { CustomBotClient } from '../classes/custom-bot-client.class';
 import { MarketplaceConfig } from '../config/marketplace.config';
 import { NotFoundException } from '../classes/errors';
-import { ICustomBotClient } from 'interfaces/custom-bot';
+import { ICustomBotClient } from '../interfaces/custom-bot';
 import { IMarketplace, IMarketplaceBuyItem } from '../interfaces/marketplace';
 
 export class MarketplaceController {
